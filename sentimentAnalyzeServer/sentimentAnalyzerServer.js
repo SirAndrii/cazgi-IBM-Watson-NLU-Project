@@ -32,11 +32,11 @@ function getNLUInstance() {
     return naturalLanguageUnderstanding;
 }
 
-function urlNLU (urlToAnalyze,operationNLU) {
+async function urlNLU ( dataType,data,operationNLU) {
    
     const analyzeParams = 
     {
-        "url": urlToAnalyze,
+        [dataType]: data,
         "features": {
             "keywords": {
                 [operationNLU]: true,
@@ -47,14 +47,14 @@ function urlNLU (urlToAnalyze,operationNLU) {
     
     const naturalLanguageUnderstanding = getNLUInstance();
     
-    naturalLanguageUnderstanding.analyze(analyzeParams)
+   return naturalLanguageUnderstanding.analyze(analyzeParams)
     .then(analysisResults => {
         //Retrieve the sentiment and return it as a formatted string
-
-        return res.send(analysisResults.result.keywords[0][operationNLU],null,2);
+       console.log( analysisResults.result.keywords[0][operationNLU] )
+        return analysisResults.result.keywords[0][operationNLU];
     })
     .catch(err => {
-        return res.send("Could not do desired operation "+err);
+        return ("Could not do desired operation "+err);
     });
 }
 
@@ -66,24 +66,44 @@ app.get("/",(req,res)=>{
   });
 
 //The endpoint for the webserver ending with /url/emotion
-app.get("/url/emotion", (req,res) => {
+app.get("/url/emotion", async (req,res) => {
      //Extract the url passed from the client through the request object
-     let urlToAnalyze = req.query.url;
-     return urlNLU(urlToAnalyze , emotion);
+     const dataType = 'url'
+    const data =  req.query[dataType]
+    const NLU = 'emotion'
+    const response = await urlNLU( dataType, data, NLU); 
+
+    return res.send( response );
 });
 
 //The endpoint for the webserver ending with /url/sentiment
-app.get("/url/sentiment", (req,res) => {
-    return urlNLU(urlToAnalyze , sentiment);
+app.get("/url/sentiment", async(req,res) => {
+    const dataType = 'url'
+    const data =  req.query[dataType]
+    const NLU = 'sentiment'
+    const response = await urlNLU( dataType, data, NLU); 
+
+    return res.send( response );
 });
 
 //The endpoint for the webserver ending with /text/emotion
-app.get("/text/emotion", (req,res) => {
-    return urlNLU(urlToAnalyze , emotion);
+app.get("/text/emotion", async (req,res) => {
+    const dataType = 'text'
+    const data =  req.query[dataType]
+    const NLU = 'emotion'
+    const response = await urlNLU( dataType, data, NLU); 
+ 
+    return res.send( response );
 });
 
-app.get("/text/sentiment", (req,res) => {
-    return urlNLU(urlToAnalyze , sentiment);
+app.get("/text/sentiment", async (req,res) => {
+    const dataType = 'text'
+    const data =  req.query[dataType]
+    const NLU = 'sentiment'
+    const response = await urlNLU( dataType, data, NLU); 
+
+    return res.send( response );
+
 });
 
 let server = app.listen(8080, () => {
